@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Collaborative Drawing Canvas</title>
+
+  <!-- this is the css file which provides basic styles for the layout and  the canvas*/ -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- this div is defined to provide the controls for drawing  -->
+  <div class="controls">
+    <div class="control-group">
+      <label for="colorPicker">Color</label>
+      <input
+        type="color"
+        id="colorPicker"
+        value="#000000"
+      />
+    </div>
+
+    <div class="control-group">
+      <label for="brushWidth">Width</label>
+      <input
+        type="range"
+        id="brushWidth"
+        min="1"
+        max="50"
+        value="3"
+      />
+      <span id="widthDisplay">3</span>px
+    </div>
+
+    <div class="control-group">
+      <button id="clearBtn">
+        Clear Canvas
+      </button>
+    </div>
+  </div>
+
+  <!-- here i have created the drawing area using canvas with the canvas  -->
+  <canvas id="drawingCanvas"></canvas>
+
+  <!-- connected other application scripts -->
+  <script src="canvas.js"></script>
+  <script src="websocket.js"></script>
+  <script src="main.js"></script>
+
+</body>
+</html>

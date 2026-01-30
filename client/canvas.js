@@ -1,65 +1,29 @@
-/**
- * Canvas Module
- * 
- * Handles all drawing operations on the HTML5 canvas.
- * This includes:
- * - Setting up the canvas context
- * - Capturing mouse events
- * - Drawing strokes
- * - Rendering the canvas from stroke history
- */
 
-// Get canvas element and context
-const canvas = document.getElementById('drawingCanvas');
-const ctx = canvas.getContext('2d');
 
-// ===========================
-// Canvas Setup
-// ===========================
+//here the canvas.js file handles local drawing functionality 
+const canvas = document.getElementById('drawingCanvas'); //using the javaScript we are controlling and updating the canvas.
+const ctx = canvas.getContext('2d');//this is the context which gives you the drawing tool for the canvas
+let strokeHistory = [];
 
-/**
- * Resize canvas to fill window
- * This is called on initialization and whenever window resizes
- */
+
+
+// this function is used to resize the canvas according to the window size
 function resizeCanvas() {
   // Set canvas size to match window
   canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight - 60; // Subtract control panel height
-
-  // Redraw all strokes after resize
-  // (This ensures nothing is lost when canvas is resized)
-  redrawCanvas();
+  canvas.height = window.innerHeight - 60; // leaving space for control panel
+  redrawCanvas();// this function is used to redraw stored strokes after resizing the canvas
 }
 
-// Resize canvas on initialization
+// resizeing  canvas on initialization
 resizeCanvas();
 
-// Resize canvas when window is resized
+// resize again if window size changes
 window.addEventListener('resize', resizeCanvas);
 
-// ===========================
-// Stroke Management
-// ===========================
+//this below array is used to store the strokes drawn on the canvas
 
-/**
- * Local stroke history (Step 1 only)
- * In Step 2, this will be replaced with server-synced history
- * Each stroke object contains:
- * - userId: who drew it
- * - color: brush color (hex)
- * - width: brush width (pixels)
- * - points: array of {x, y} coordinates
- * - timestamp: when stroke was created
- */
-let strokeHistory = [];
-
-/**
- * Create a new stroke object
- * @param {string} userId - User identifier
- * @param {string} color - Hex color code
- * @param {number} width - Brush width in pixels
- * @returns {Object} Empty stroke object ready to receive points
- */
+//this function creates a new stroke object with given parameters
 function createStroke(userId, color, width) {
   return {
     id: generateStrokeId(),
@@ -71,28 +35,17 @@ function createStroke(userId, color, width) {
   };
 }
 
-/**
- * Generate a unique stroke ID
- * @returns {string} Unique identifier
- */
+//we will generate unique id for each stroke so that we can identify them later when we require
 function generateStrokeId() {
   return `stroke_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
-/**
- * Add a point to the current stroke
- * @param {Object} stroke - The stroke to add to
- * @param {number} x - X coordinate
- * @param {number} y - Y coordinate
- */
+//this function adds a new point to the current stroke being drawn
 function addPointToStroke(stroke, x, y) {
   stroke.points.push({ x, y });
 }
 
-/**
- * Add a completed stroke to history
- * @param {Object} stroke - Completed stroke
- */
+//we will save completed strokes to the history for future reference
 function addStrokeToHistory(stroke) {
   // Only add stroke if it has at least one point
   if (stroke.points.length > 0) {
@@ -100,18 +53,7 @@ function addStrokeToHistory(stroke) {
   }
 }
 
-// ===========================
-// Drawing Functions
-// ===========================
-
-/**
- * Draw a single point on the canvas
- * Used to draw individual dots if user clicks without dragging
- * @param {number} x - X coordinate
- * @param {number} y - Y coordinate
- * @param {string} color - Hex color
- * @param {number} width - Brush width
- */
+// used to draw a single point on the canvas
 function drawPoint(x, y, color, width) {
   ctx.beginPath();
   ctx.arc(x, y, width / 2, 0, Math.PI * 2);
@@ -120,16 +62,7 @@ function drawPoint(x, y, color, width) {
   ctx.closePath();
 }
 
-/**
- * Draw a line between two points
- * Used to draw smooth lines between consecutive points
- * @param {number} fromX - Start X coordinate
- * @param {number} fromY - Start Y coordinate
- * @param {number} toX - End X coordinate
- * @param {number} toY - End Y coordinate
- * @param {string} color - Hex color
- * @param {number} width - Brush width
- */
+//this below function draws a line between two points with specified color and width
 function drawLine(fromX, fromY, toX, toY, color, width) {
   ctx.beginPath();
   ctx.moveTo(fromX, fromY);
@@ -142,40 +75,28 @@ function drawLine(fromX, fromY, toX, toY, color, width) {
   ctx.closePath();
 }
 
-/**
- * Redraw entire canvas from stroke history
- * This is called when:
- * - Canvas is resized
- * - Undo is performed (when implemented)
- * - Canvas is cleared
- */
+//this function redraws the entire canvas based on the stored stroke history
 function redrawCanvas() {
-  // Clear canvas (fill with white)
+  
   ctx.fillStyle = 'white';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // Redraw all strokes in history order
   for (let stroke of strokeHistory) {
     drawStroke(stroke);
   }
 }
 
-/**
- * Draw a complete stroke on the canvas
- * @param {Object} stroke - The stroke to draw
- */
+//this function draws a complete stroke on the canvas using the stored points
 function drawStroke(stroke) {
   const { color, width, points } = stroke;
 
   if (points.length === 0) {
-    return; // Nothing to draw
+    return; 
   }
 
   if (points.length === 1) {
-    // Single point: just draw a dot
     drawPoint(points[0].x, points[0].y, color, width);
   } else {
-    // Multiple points: draw lines between consecutive points
+    
     for (let i = 1; i < points.length; i++) {
       const from = points[i - 1];
       const to = points[i];
@@ -184,31 +105,17 @@ function drawStroke(stroke) {
   }
 }
 
-/**
- * Clear entire canvas
- * This removes all strokes and resets the history
- */
+//here the below function clears the entire canvas and resets the stroke history
 function clearCanvasCompletely() {
   strokeHistory = [];
   redrawCanvas();
 }
 
-// ===========================
-// Mouse Event Handling
-// ===========================
 
-/**
- * Current stroke being drawn
- * This is null when no stroke is in progress
- */
-let currentStroke = null;
+let currentStroke = null;//current storke being drawn by the user while mouse is pressed
 
-/**
- * Get mouse position relative to canvas
- * @param {MouseEvent} event - The mouse event
- * @returns {Object} {x, y} coordinates
- */
-function getMousePos(event) {
+
+function getMousePos(event) {//converting the mouse event coordinates to canvas coordinates
   const rect = canvas.getBoundingClientRect();
   return {
     x: event.clientX - rect.left,
@@ -216,29 +123,20 @@ function getMousePos(event) {
   };
 }
 
-/**
- * Handle mouse down (start drawing)
- */
-canvas.addEventListener('mousedown', (event) => {
+
+canvas.addEventListener('mousedown', (event) => {// we will start drawing here
   const color = document.getElementById('colorPicker').value;
   const width = parseInt(document.getElementById('brushWidth').value);
 
-  // Create a new stroke
-  currentStroke = createStroke('user1', color, width); // TODO: Replace 'user1' with actual userId
+  currentStroke = createStroke('user1', color, width); // userid will come from the server later
 
-  // Get starting position
   const pos = getMousePos(event);
   addPointToStroke(currentStroke, pos.x, pos.y);
-
-  // Draw initial point
   drawPoint(pos.x, pos.y, color, width);
 });
 
-/**
- * Handle mouse move (draw line)
- */
+//drawing continues as mouse moves
 canvas.addEventListener('mousemove', (event) => {
-  // Only draw if mouse button is pressed
   if (!currentStroke) {
     return;
   }
@@ -248,8 +146,6 @@ canvas.addEventListener('mousemove', (event) => {
 
   // Add new point to stroke
   addPointToStroke(currentStroke, pos.x, pos.y);
-
-  // Draw line from last point to new point
   drawLine(
     lastPoint.x,
     lastPoint.y,
@@ -260,85 +156,44 @@ canvas.addEventListener('mousemove', (event) => {
   );
 });
 
-/**
- * Handle mouse up (finish drawing)
- */
+//drawing ends when mouse is released
 canvas.addEventListener('mouseup', () => {
-  if (currentStroke) {
-    // Add completed stroke to history
+  if (!currentStroke)return;
     addStrokeToHistory(currentStroke);
-
-    // TODO: Emit stroke to server via WebSocket
-    // websocket.emit('stroke:draw', currentStroke);
-
-    // Clear current stroke
     currentStroke = null;
-  }
+  
 });
 
-/**
- * Handle mouse leaving canvas (stop drawing)
- */
+// also handle case when mouse leaves canvas while drawing
 canvas.addEventListener('mouseleave', () => {
-  if (currentStroke) {
-    // Add completed stroke to history
+  if (!currentStroke) return;
     addStrokeToHistory(currentStroke);
-
-    // TODO: Emit stroke to server via WebSocket
-    // websocket.emit('stroke:draw', currentStroke);
-
-    // Clear current stroke
     currentStroke = null;
-  }
+  
 });
 
-// ===========================
-// UI Control Handlers
-// ===========================
-
-/**
- * Update brush width display when slider changes
- */
+//updating the brush width display when slider is moved
 document.getElementById('brushWidth').addEventListener('input', (event) => {
   document.getElementById('widthDisplay').textContent = event.target.value;
 });
 
-/**
- * Clear canvas button
- */
+//handling clear button click to clear the canvas
 document.getElementById('clearBtn').addEventListener('click', () => {
   clearCanvasCompletely();
-
-  // TODO: Emit clear action to server
-  // websocket.emit('action:clear');
 });
 
-// ===========================
-// Public API for other modules
-// ===========================
-
-/**
- * Render remote strokes from server
- * This will be used in Step 2 to draw strokes from other users
- * @param {Object} stroke - The stroke to draw
- */
+// used to render remote strokes received from server
 function renderRemoteStroke(stroke) {
   drawStroke(stroke);
 }
 
-/**
- * Update stroke history (called by server in later steps)
- * @param {Array} newHistory - New stroke history from server
- */
+// used to update local stroke history with server data and sync it
 function updateStrokeHistory(newHistory) {
   strokeHistory = newHistory;
   redrawCanvas();
 }
 
-/**
- * Get current stroke history (for debugging)
- * @returns {Array} Current stroke history
- */
-function getStrokeHistory() {
+
+function getStrokeHistory() {//this will help for debugging to view all stored strokes
   return strokeHistory;
 }

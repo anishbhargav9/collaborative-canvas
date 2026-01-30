@@ -160,6 +160,10 @@ canvas.addEventListener('mousemove', (event) => {
 canvas.addEventListener('mouseup', () => {
   if (!currentStroke)return;
     addStrokeToHistory(currentStroke);
+    //here i am sending the stroke to the server
+    if (window.socket) {
+    window.socket.emit('stroke:draw', currentStroke);
+  }
     currentStroke = null;
   
 });
@@ -168,6 +172,9 @@ canvas.addEventListener('mouseup', () => {
 canvas.addEventListener('mouseleave', () => {
   if (!currentStroke) return;
     addStrokeToHistory(currentStroke);
+    if (window.socket) {
+    window.socket.emit('stroke:draw', currentStroke);
+  }
     currentStroke = null;
   
 });

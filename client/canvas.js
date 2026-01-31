@@ -204,3 +204,23 @@ function updateStrokeHistory(newHistory) {
 function getStrokeHistory() {//this will help for debugging to view all stored strokes
   return strokeHistory;
 }
+
+//  handling undo button click to request global undo from server
+const undoButton = document.getElementById('undoBtn');
+
+if (undoButton) {
+  undoButton.addEventListener('click', () => {
+    console.log('Undo button clicked');
+    console.log('Socket object:', window.socket);
+
+    if (window.socket && window.socket.connected) {
+      console.log('Emitting action:undo');
+      window.socket.emit('action:undo');
+    } else {
+      console.log('Socket not connected');
+    }
+  });
+}
+
+
+

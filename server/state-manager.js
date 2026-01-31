@@ -1,108 +1,55 @@
-/**
- * State Manager Module
- * 
- * Manages the server-side stroke history and undo operations.
- * This is the single source of truth for all drawing state.
- * 
- * Responsibilities:
- * - Maintain authoritative stroke history
- * - Add new strokes in order
- * - Implement global undo (remove last stroke)
- * - Validate stroke data
- * 
- * TODO: Implement in Step 2/3
- */
 
-/**
- * Stroke history - the authoritative source of truth
- * @type {Array}
- */
+// This state-manager.js file is responsible for managing the drawing state on the server side
+
 let strokeHistory = [];
 
-/**
- * Add a new stroke to the history
- * @param {Object} stroke - The stroke to add
- * @returns {Object} The stroke with timestamp added by server
- */
+// add a new stroke to the history so that the server remembers that has been drawnand can rebuild the canvas for new clients at any time
 function addStroke(stroke) {
-  // TODO: Validate stroke data
-  // - Ensure required fields exist
-  // - Ensure color is valid hex
-  // - Ensure width is reasonable
-  // - Ensure points array is not empty
+  if (!stroke || !Array.isArray(stroke.points) || stroke.points.length === 0) {
+    return null;
+  }
 
-  // Add server timestamp if not present
   if (!stroke.timestamp) {
     stroke.timestamp = Date.now();
   }
 
-  // Add to history
   strokeHistory.push(stroke);
-
   return stroke;
 }
 
-/**
- * Remove the last stroke from history (undo)
- * @returns {Object|null} The removed stroke, or null if history is empty
- */
+// remove the most recent stroke this is know as the global undo operation
 function undoLastStroke() {
   if (strokeHistory.length === 0) {
-    console.log('Cannot undo: history is empty');
     return null;
   }
-
-  const removed = strokeHistory.pop();
-  console.log('Undo: removed stroke', removed.id);
-
-  return removed;
+  return strokeHistory.pop();
 }
 
-/**
- * Get the current stroke history
- * @returns {Array} Copy of stroke history
- */
+// return a copy of the current history because we don't want external modules to modify our internal state directly
 function getStrokeHistory() {
   return [...strokeHistory];
 }
 
-/**
- * Clear all strokes
- */
+// clear entire history  so that the canvas can be reset and redrawn from scratch
 function clearHistory() {
-  const count = strokeHistory.length;
   strokeHistory = [];
-  console.log(`Cleared ${count} strokes`);
 }
 
-/**
- * Get history size
- * @returns {number} Number of strokes in history
- */
+// number of strokes stored in history for status reporting or validation
 function getHistorySize() {
   return strokeHistory.length;
 }
 
-/**
- * Replace entire history (for sync)
- * @param {Array} newHistory - New stroke history
- */
+// replace history completely this is mainly used for the initial sync when a new client connects
 function setStrokeHistory(newHistory) {
-  strokeHistory = newHistory;
+  strokeHistory = Array.isArray(newHistory) ? newHistory : [];
 }
 
-// ===========================
-// Export for use in server.js
-// ===========================
-
-// TODO: Uncomment when implementing Step 2
-// module.exports = {
-//   addStroke,
-//   undoLastStroke,
-//   getStrokeHistory,
-//   clearHistory,
-//   getHistorySize,
-//   setStrokeHistory
-// };
-
-console.log('State Manager module loaded (TODO: implement in Step 2)');
+module.exports = {
+  addStroke,
+  undoLastStroke,
+  getStrokeHistory,
+  clearHistory,
+  getHistorySize,
+  setStrokeHistory
+};

@@ -14,7 +14,26 @@ socket.on('stroke:draw', (stroke) => {
     //rendering the remote stroke on the canvas
   renderRemoteStroke(stroke);
 });
+// receive full canvas state from server so that it can  used after undo
+socket.on('canvas:sync', (updatedHistory) => {
+    console.log('Canvas sync received');// to check if sync is received
+  updateStrokeHistory(updatedHistory);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const undoButton = document.getElementById('undoBtn');
+
+  if (!undoButton) return;
+
+  undoButton.addEventListener('click', () => {
+    console.log('Undo button clicked (websocket)');
+    socket.emit('action:undo');
+  });
+});
+
+
 
 socket.on('disconnect', () => {
   console.log('Disconnected from server');
 });
+7

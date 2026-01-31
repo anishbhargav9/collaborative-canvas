@@ -184,10 +184,7 @@ document.getElementById('brushWidth').addEventListener('input', (event) => {
   document.getElementById('widthDisplay').textContent = event.target.value;
 });
 
-//handling clear button click to clear the canvas
-document.getElementById('clearBtn').addEventListener('click', () => {
-  clearCanvasCompletely();
-});
+
 
 // used to render remote strokes received from server
 function renderRemoteStroke(stroke) {

@@ -2,7 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
-const stateManager = require('./state-manager');
+const stateManager = require('./state-manager')
 
 const app = express();
 const server = http.createServer(app);
@@ -32,10 +32,26 @@ io.on('connection', (socket) => {
 
 
   //adding a new functionality that is the global undo feature
-  socket.on('action:undo', () => {
-  stateManager.undoLastStroke();//removing the last stroke from the server's history
-  const updatedHistory = stateManager.getStrokeHistory();//getting the updated history after undo
-  io.emit('canvas:sync', updatedHistory);//sending the updated history to all clients to sync their canvases
+ socket.on('action:undo', () => {
+  console.log("Undo requested by", socket.id);
+
+  stateManager.undoLastStroke();
+
+  const updatedHistory = stateManager.getStrokeHistory();
+
+  console.log("Broadcasting canvas sync. History size:", updatedHistory.length);
+
+  io.emit('canvas:sync', updatedHistory);
+});
+
+socket.on('action:clear', () => {
+  console.log('Clear canvas requested by', socket.id);
+
+  stateManager.clearHistory();
+
+  const updatedHistory = stateManager.getStrokeHistory();
+
+  io.emit('canvas:sync', updatedHistory);
 });
 
 });

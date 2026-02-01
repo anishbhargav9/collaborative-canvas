@@ -51,3 +51,7 @@ git clone https://github.com/anishbhargav9/collaborative-canvas.git
 
 
 2. command to run in the powershell is npm start.
+
+##Live Deployed Application link where we can see the demo of the application(Deployed in Render)
+https://collaborative-canvas-90a3.onrender.com/
+
